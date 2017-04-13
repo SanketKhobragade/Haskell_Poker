@@ -40,7 +40,7 @@ action_call p money =
 action_raise :: Player-> Int ->Player	
 action_raise p money = 
 	p{chips = chips p - money, bet = bet p + money, round_bet = round_bet p + money,
-	 status = if chips p == money then Allin else Play}	
+	 	status = if chips p == money then Allin else Play}	
 	 
 action_check p = p
 
@@ -62,6 +62,16 @@ turn :: [Player] -> Int -> Int -> [Player]
 turn p i n = 
 	if n > 5 && (round_over p) then p
 	else turn (action p i) (i `mod` 5 + 1) (n+1)
+	
+action_decide :: [Player] -> Int -> Int
+action_decide x turn = 
+	if money_bet == round_money then 2
+	else if (round_money - money_bet) >= chips pl then 3
+	else 1
+	where 
+	pl = (x!!turn)
+	money_bet = round_bet pl
+	round_money = round_bet (maximumBy (compare `on` round_bet) x) 
 	
 --round :: [Player] -> Int -> Int
 
