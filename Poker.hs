@@ -1,14 +1,18 @@
 import Graphics.UI.Gtk
 import Data.List
 import Shuffle
-
+import Best5
+import Player
+import System.IO.Unsafe
+import System.Glib
 back = "deck/back.jpg"
 
 pl_card = [Card{rank = 3,suit = Spade},Card {rank = 13,suit = Diamond} ]
 
-display :: IO ()
-display = do
+display :: Int -> Int -> [Player] -> IO Int
+display round turn p_list = do
   	initGUI
+  	afs <- getLine
 	window     <- windowNew
 	vbox       <- vBoxNew False 0
 	
@@ -21,7 +25,7 @@ display = do
 	miscSetAlignment label1 0 0
 	boxPackStart vbox label1 PackNatural 0
 	
-	box1      <- makeCommunityCards community_cards 3 False 0 PackNatural 0
+	box1      <- makeCommunityCards community_cards round False 0 PackNatural 0
 	boxPackStart vbox box1 PackNatural 0
 	
 	sep        <- hSeparatorNew
@@ -31,20 +35,25 @@ display = do
 	miscSetAlignment label2 0 0
 	boxPackStart vbox label2 PackNatural 0
 	
-	box2       <- makePlayerCards pl_card False 0 PackNatural 0
+	box2       <- makePlayerCards (cards (p_list!!turn)) False 0 PackNatural 0
 	boxPackStart vbox box2 PackNatural 0
 	
 	sep2        <- hSeparatorNew
 	boxPackStart vbox sep2 PackNatural 10
 	
+	
+	
 	quitbox    <- hBoxNew False 0
 	boxPackStart vbox quitbox PackNatural 0
-	quitbutton <- buttonNewWithLabel "Quit"
+	quitbutton <- buttonNewWithLabel "Click on X to continue"
 	boxPackStart quitbox quitbutton PackRepel 0
-	onClicked quitbutton mainQuit
-	onDestroy window mainQuit
 	widgetShowAll window
+	--onClicked quitbutton mainQuit
+	onDestroy window mainQuit
 	mainGUI
+	--num <- get_bet
+	return 5
+	
 	
 
 makeCommunityCards :: [Card] -> Int -> Bool -> Int -> Packing -> Int -> IO HBox
@@ -91,57 +100,6 @@ makePlayerCards xs homogeneous spacing packing padding = do
 	boxPackEnd box button2 packing padding
 	containerAdd button2 b
 	
-	box6       <- actionButtons3 False 0 PackGrow 0
-	boxPackEnd box box6 PackNatural 0
-	
-	return box
-	
-actionButtons1 :: Bool -> Int -> Packing -> Int -> IO VBox
-actionButtons1 homogeneous spacing packing padding = do
-	box     <- vBoxNew homogeneous spacing
-	
-	button3	<- buttonNewWithLabel "\tCall\t\t"
-	button4	<- buttonNewWithLabel "\tRaise\t"
-	button5	<- buttonNewWithLabel "\tFold\t\t"
---	button6	<- buttonNewWithLabel "\tAll in\t"
-	
-	boxPackStart box button3 packing padding
-	boxPackStart box button4 packing padding
-	boxPackStart box button5 packing padding
---	boxPackStart box button6 packing padding
-
-	return box 
-
-actionButtons2 :: Bool -> Int -> Packing -> Int -> IO VBox
-actionButtons2 homogeneous spacing packing padding = do
-	box     <- vBoxNew homogeneous spacing
-	
---	button3	<- buttonNewWithLabel "\tCall\t\t"
-	button4	<- buttonNewWithLabel "\tCheck\t"
-	button5	<- buttonNewWithLabel "\tBet\t\t"
-	button6	<- buttonNewWithLabel "\tAll in\t"
-	
---	boxPackStart box button3 packing padding
-	boxPackStart box button4 packing padding
-	boxPackStart box button5 packing padding
-	boxPackStart box button6 packing padding
-	
-	return box
-
-actionButtons3 :: Bool -> Int -> Packing -> Int -> IO VBox
-actionButtons3 homogeneous spacing packing padding = do
-	box     <- vBoxNew homogeneous spacing
-	
-	button3	<- buttonNewWithLabel "\tCall\t\t"
---	button4	<- buttonNewWithLabel "\tRaise\t"
-	button5	<- buttonNewWithLabel "\tFold\t\t"
-	button6	<- buttonNewWithLabel "\tAll in\t"
-	
-	boxPackStart box button3 packing padding
---	boxPackStart box button4 packing padding
-	boxPackStart box button5 packing padding
-	boxPackStart box button6 packing padding
-	
 	return box
 	
 check1 :: Int -> Int -> [Card] -> IO HBox
@@ -167,6 +125,64 @@ labelBox fn = do
 card2file :: Card -> [Char]
 card2file c = "deck/" ++ (show (rank c)) ++ (show (suit c)) ++ ".jpg"
 
+{-actionCheck :: Int -> IO VBox
+actionCheck a = if a==1 then actionButtons1 False 0 PackGrow 0
+		else if a==2 then actionButtons2 False 0 PackGrow 0
+		else actionButtons3 False 0 PackGrow 0-}
+
 card = Card{rank = 2,suit = Spade}
+
+
 	
-main = display
+
+get_action1 :: IO Int
+get_action1 = do 
+	putStrLn "1. Bet\n2. Check\n3. Fold "
+	txt <- getLine
+	let num = read txt :: Int
+	r<- (get_bet1 num)
+	return r
+
+get_action2 :: IO Int
+get_action2 = do
+	putStrLn "1. Raise\n2. Call\n3. Fold "
+	txt <- getLine
+	let num = read txt :: Int
+	r<- (get_bet1 num)
+	return r
+
+get_action3 :: IO Int
+get_action3 = do 
+	putStrLn "1. All-in\n2. Fold "
+	txt <- getLine
+	let num = read txt :: Int
+	r<- (get_bet1 num)
+	return r
+
+get_bet :: Int -> IO Int
+get_bet x = do 
+	putStrLn ("Enter amount " ++ (show x) ++ " + ") 
+	txt <- getLine
+	let num = read txt :: Int
+	return (num + x)
+	
+get_bet1 :: Int -> IO Int
+get_bet1 x = do
+	if x == 3 then return (-1)
+	else if x == 2 then return 0
+	else (get_bet 50)
+
+	
+get_bet2 :: Int -> IO Int
+get_bet2 x = do
+	if x == 3 then return (-1)
+	else if x == 2 then return 0
+	else (get_bet 0)
+		
+
+	
+main = do
+	n <- get_action2
+	print(n)
+	
+	
