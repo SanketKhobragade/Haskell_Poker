@@ -1,3 +1,5 @@
+module Poker where
+
 import Graphics.UI.Gtk
 import Data.List
 import Shuffle
@@ -7,12 +9,11 @@ import System.IO.Unsafe
 import System.Glib
 back = "deck/back.jpg"
 
-pl_card = [Card{rank = 3,suit = Spade},Card {rank = 13,suit = Diamond} ]
+--pl_card = [Card{rank = 3,suit = Spade},Card {rank = 13,suit = Diamond} ]
 
 display :: Int -> Int -> [Player] -> IO Int
 display round turn p_list = do
   	initGUI
-  	afs <- getLine
 	window     <- windowNew
 	vbox       <- vBoxNew False 0
 	
@@ -140,23 +141,23 @@ get_action1 = do
 	putStrLn "1. Bet\n2. Check\n3. Fold "
 	txt <- getLine
 	let num = read txt :: Int
-	r<- (get_bet1 num)
+	r<- (get_bet1 num (-1))
 	return r
 
-get_action2 :: IO Int
-get_action2 = do
+get_action2 :: Int -> IO Int
+get_action2 x = do
 	putStrLn "1. Raise\n2. Call\n3. Fold "
 	txt <- getLine
 	let num = read txt :: Int
-	r<- (get_bet1 num)
+	r<- (get_bet1 num x) 
 	return r
 
 get_action3 :: IO Int
 get_action3 = do 
-	putStrLn "1. All-in\n2. Fold "
+	putStrLn "2. All-in\n3. Fold "
 	txt <- getLine
 	let num = read txt :: Int
-	r<- (get_bet1 num)
+	r<- (get_bet2 num)
 	return r
 
 get_bet :: Int -> IO Int
@@ -166,29 +167,28 @@ get_bet x = do
 	let num = read txt :: Int
 	return (num + x)
 	
-get_bet1 :: Int -> IO Int
-get_bet1 x = do
+get_bet1 :: Int -> Int -> IO Int
+get_bet1 x c = do
 	if x == 3 then return (-1)
 	else if x == 2 then return 0
-	else (get_bet 50)
-
+	else if (c==(-1)) then (get_bet 0)
+	else (get_bet c) 
 	
 get_bet2 :: Int -> IO Int
+get_bet2 x = do 
+	if x ==2 then return (-1)
+	else return 1
+	
+{-get_bet2 :: Int -> IO Int
 get_bet2 x = do
 	if x == 3 then return (-1)
 	else if x == 2 then return 0
-	else (get_bet 0)
+	else (get_bet 0)-}
 		
-
 link_action :: Int ->IO Int
 link_action x = do
 	if x == 1 then get_action3
-	else if x == 2  get_action1 
-	else if x == 3  get_action2
-	
-main = do
-	n <- get_action2
-	print(n)
-	link_action (action_decide x turn) 
+	else if x == 2 then get_action1 
+	else (get_action2 45)
 	
 	
