@@ -60,11 +60,8 @@ straight (x:xs)
 
 --------Dividing cards into groups of same number, then taking 5 cards to ensure best possible comb.----
 
-remove :: Int -> [[Card]] -> [[Card]]
-remove _ [] = []
-remove num (x:xs) = 
-	if rank (x !! 0) == num then remove num xs
-	else x : remove num xs
+remove :: [Card] -> [[Card]] -> [[Card]]
+remove card list = filter(\x -> x/=card) list
 
 max_length :: [[Card]] -> [Card]
 max_length [] = []
@@ -78,7 +75,9 @@ sort_pairs :: [[Card]] -> [[Card]] -> Int -> [[Card]]
 sort_pairs l1 l2 remain = 	
 	if remain <= 0 then take 5 l2
 	else if length (head (l1)) == remain then l2 ++ [head l1]
-	else sort_pairs (remove (rank ((max_length l1)!!0)) l1) (l2 ++ [take remain (max_length l1)])  (remain - length (take remain (max_length l1)))
+	else sort_pairs (remove xs l1) (l2 ++ [xs])  (remain - length xs)
+	where 
+	xs = maximumBy (compare `on` length) (reverse l1)
 
 ---------------------------------------------------------------------------------------------------------		
 	
