@@ -180,9 +180,15 @@ get_bet2 x = do
 	else (get_bet 0)
 		
 
+link_action :: Int ->IO Int
+link_action x = do
+	if x == 1 then get_action3
+	else if x == 2  get_action1 
+	else if x == 3  get_action2
 	
 main = do
 	n <- get_action2
 	print(n)
+	link_action (action_decide x turn) 
 	
 	
