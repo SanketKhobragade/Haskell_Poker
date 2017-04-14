@@ -1,4 +1,5 @@
---import Poker 
+
+import Poker 
 import Data.List (tails)
 import Data.List
 import Data.List (sortBy)
@@ -80,6 +81,8 @@ start_game p = do
 	--print best5list
 	let win = pot best5list 
 	let init = map (\x -> x{status = Play, round_bet = 0, bet = 0, cards = [], top5 = []}) win
+	print_winner
+	print_winning_player (winning_player p)
 	--print init
 	(start_game init)
 
@@ -94,14 +97,20 @@ print_list p i = if i<=4 then do
 		else putStrLn ""
 		where pl = (p!!i)
 			
-	
-print_winner :: [Player] -> Int -> IO()
-print_winner x i = do
-	if i < length ( winning_player x) then 
-			print (top5 ( winning_player x)!!i)
-			print_winner x i+1
-	else putStrLn ""
+
+print_winner :: IO ()
+print_winner = do
+		putStrLn "Congratulation!! Winners : "
+		putStrLn("Name\tChips")
+
+print_winning_player :: [Player] -> IO ()
+print_winning_player (x:xs) = do
+				if (length xs == 0) then print_player x
+				else print_winning_player xs
+
+print_player :: Player -> IO ()
+print_player p = do 
+		putStrLn ((show (name p)) ++ "\t" ++ (show (chips p)))
 		
 main = do
-	start_game (playerList 0 3)
-	
+	start_game (playerList 0 0)
