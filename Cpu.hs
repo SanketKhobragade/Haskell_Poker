@@ -1,3 +1,4 @@
+module Cpu where 
 import Player
 import Winner
 import Best5
@@ -13,8 +14,8 @@ player_list = [  Player{name = 1, status = Play, chips = 10, bet = 120, round_be
 community_cards = [Card{rank = 5, suit = Club}, Card{rank = 10, suit = Diamond}, Card{rank = 7, suit = Spade}, Card{rank = 13, suit = Diamond}, Card{rank = 9, suit = Heart}]
 
 
-hands = map (\x -> x{top5 = preference (cards x ++ community_cards)})
-play_list = hands player_list
+hands2 = map (\x -> x{top5 = preference (cards x ++ community_cards)})
+play_list = hands2 player_list
 
 all_possible :: Player -> [Card] -> [[Card]] -> Int
 all_possible _ _ [] = 0
@@ -97,21 +98,33 @@ bet_range2 p i deck =
 	
 bet_amt :: [Player] -> Int -> Int -> [Card] -> Int
 call_amt :: [Player] -> Int -> Int -> [Card] -> Int
-
+cpu_decide :: [Player] -> Int -> Int -> [Card] -> [Player]
 bet_amt p index round deck = 	
-	if round < 3 then min (range) (50*round)
-	else min (max (range) (bluff p index deck)) (200)
+	if round < 3 then min range (40*round + 20)
+	else min range 200
 	where 
 	range = bet_range p index round deck
 	
 call_amt p index round deck = 
-	if range > 2 * call_val then  
+	if range > 2*call_val then (range - call_val)
+	else if range > call_val then call_val
+	else -1
 	where
 	call_val = round_bet (maximumBy (compare `on` round_bet) p) - round_bet (p!!index)
 	max_val = chips (p!!index)
 	range = bet_range p index round deck
 	
-bluff :: [Player] -> Int -> [Card] -> Int
+cpu_decide p index round deck = 
+	if diff == 0 then action p index bet
+	else action p index call
+	where
+	diff = round_bet (maximumBy (compare `on` round_bet) p) - round_bet (p!!index)
+	bet = bet_amt p index round deck
+	call = call_amt p index round deck
+
+	
+	
+{-bluff :: [Player] -> Int -> [Card] -> Int
 bluff p i deck = 
 	if potmoney < 300 then 0
 	else if elem (rank last_card) (map (\x -> rank x) (take (length deck - 1) deck)) && all_possible (p!!i){cards = [last_card]} deck (combtocards (combinations 2 list)) < 80 then 200
@@ -122,14 +135,14 @@ bluff p i deck =
 	flushlist = maximumBy (compare `on` length) (group_by_suit deck)
 	nopair = length (maximumBy (compare `on` length) (group_by_rank deck))
 	list = [1..52]\\cardtonum((cards (p!!i) ++ deck))
-	potmoney = foldl (\acc x -> acc + bet x) 0 p
+	potmoney = foldl (\acc x -> acc + bet x) 0 p-}
 	
 {- When to bluff (only when there is high money in pot)
 1. When a card opens such that there is 3 cards of same colour
 2. When at the end a number opens such that it was 2nd of same rank and is < 10 (Make sure flush or straight is not possible)
 -}
 
-main = print(bet_amt play_list 1 3 community_cards)
+--main = print(bet_amt play_list 1 3 community_cards)
 --main = print(bluff play_list 1 community_cards)
 --main = print(maximumBy (compare `on` length) (group_by_rank community_cards))
 
