@@ -1,12 +1,12 @@
 module Poker where
 
-import Graphics.UI.Gtk
+--import Graphics.UI.Gtk
 import Data.List
 import Shuffle
 import Best5
 import Player
 import System.IO.Unsafe
-import System.Glib
+--import System.Glib
 back = "deck/back.jpg"
 
 --pl_card = [Card{rank = 3,suit = Spade},Card {rank = 13,suit = Diamond} ]
@@ -136,20 +136,20 @@ card = Card{rank = 2,suit = Spade}
 
 	
 
-get_action1 :: IO Int
-get_action1 = do 
+get_action1 :: Int -> IO Int
+get_action1 y= do 
 	putStrLn "1. Bet\n2. Check\n3. Fold "
 	txt <- getLine
 	let num = read txt :: Int
-	r<- (get_bet1 num (-1))
+	r<- (get_bet1 num {--(-1)--} y)
 	return r
 
-get_action2 :: Int -> IO Int
+get_action2 :: Int -> Int -> IO Int
 get_action2 x = do
 	putStrLn ("1. Raise\n2. Call("++ show x ++")\n3. Fold s")
 	txt <- getLine
 	let num = read txt :: Int
-	r<- (get_bet1 num x) 
+	r<- (get_bet1 num x ) 
 	return r
 
 get_action3 :: IO Int
@@ -186,9 +186,9 @@ get_bet2 x = do
 	else (get_bet 0)-}
 		
 link_action :: Int ->IO Int
-link_action x call= do
-	if x == 1 then get_action3
-	else if x == 2 then get_action1 
-	else (get_action2 call)
+link_action x call y= do
+	if x == 1 then get_action3 
+	else if x == 2 then get_action1 y
+	else (get_action2 call )
 	
 	
