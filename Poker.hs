@@ -1,6 +1,6 @@
 module Poker where
 
---import Graphics.UI.Gtk
+import Graphics.UI.Gtk
 import Data.List
 import Shuffle
 import Best5
@@ -136,47 +136,61 @@ card = Card{rank = 2,suit = Spade}
 
 	
 
-get_action1 :: Int -> IO Int
-get_action1 y= do 
+get_action1 :: IO Int
+get_action1 = do 
 	putStrLn "1. Bet\n2. Check\n3. Fold "
 	txt <- getLine
 	let num = read txt :: Int
-	r<- (get_bet1 num {--(-1)--} y)
+	r<- (get_bet1 num (-1) 0)
 	return r
 
 get_action2 :: Int -> Int -> IO Int
-get_action2 x = do
-	putStrLn ("1. Raise\n2. Call("++ show x ++")\n3. Fold s")
+get_action2 x roundBet = do
+	putStrLn ("1. Raise\n2. Call("++ show x ++")\n3. Fold")
 	txt <- getLine
 	let num = read txt :: Int
-	r<- (get_bet1 num x ) 
+	r<- (get_bet1 num x roundBet ) 
 	return r
 
 get_action3 :: IO Int
 get_action3 = do 
-	putStrLn "2. All-in\n3. Fold "
+	putStrLn "1. All-in\n2. Fold "
 	txt <- getLine
-	let num = read txt :: Int
+	let num = (read txt :: Int) 
 	r<- (get_bet2 num)
 	return r
-
-get_bet :: Int -> IO Int
-get_bet x = do 
-	putStrLn ("Enter amount " ++ (show x) ++ " + ") 
+	
+get_action4 :: Int -> IO Int
+get_action4 x = do
+	putStrLn ("1. Allin\n2. Call("++ show x ++")\n3. Fold")
 	txt <- getLine
 	let num = read txt :: Int
-	return (num + x)
+	r<- (get_bet3 num x) 
+	return r
+
+get_bet :: Int -> Int -> IO Int
+get_bet x roundBet = do 
+	putStrLn ("Enter amount " ++ (show (2*(x-roundBet))) ++ " + ") 
+	txt <- getLine
+	let num = read txt :: Int
+	return (num + (2*(x-roundBet)))
 	
-get_bet1 :: Int -> Int -> IO Int
-get_bet1 x c = do
+get_bet1 :: Int -> Int -> Int -> IO Int
+get_bet1 x c roundBet = do
 	if x == 3 then return (-1)
 	else if x == 2 then return 0
-	else if (c==(-1)) then (get_bet 0)
-	else (get_bet c) 
+	else if (c==(-1)) then (get_bet 0 0)
+	else (get_bet c roundBet) 
 	
 get_bet2 :: Int -> IO Int
 get_bet2 x = do 
 	if x ==2 then return (-1)
+	else return (-2)
+	
+get_bet3 :: Int -> Int -> IO Int
+get_bet3 x c = do
+	if x == 3 then return (-1)
+	else if x == 2 then return 0
 	else return (-2)
 	
 {-get_bet2 :: Int -> IO Int
@@ -185,10 +199,10 @@ get_bet2 x = do
 	else if x == 2 then return 0
 	else (get_bet 0)-}
 		
-link_action :: Int ->IO Int
-link_action x call y= do
+link_action :: Int -> Int -> Int -> Int ->IO Int
+link_action x call y roundBet = do
 	if x == 1 then get_action3 
-	else if x == 2 then get_action1 y
-	else (get_action2 call )
+	else if x == 2 then get_action1
+	else (get_action2 call roundBet )
 	
 	

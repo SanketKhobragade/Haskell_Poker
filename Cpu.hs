@@ -3,11 +3,11 @@ import Winner
 import Best5
 import Data.List
 
-player_list = [  Player{name = 1, status = Play, chips = 10, bet = 20, round_bet = 5, cards = [Card{rank = 13, suit = Club}, Card{rank = 3, suit = Club}], top5 = []},
-		 Player{name = 2, status = Fold, chips = 8, bet = 4, round_bet = 0, cards = [Card{rank = 3, suit = Heart}, Card{rank = 4, suit = Diamond}], top5 = []},
-		 Player{name = 3, status = Play, chips = 10, bet = 15, round_bet = 5, cards = [Card{rank = 12, suit = Heart}, Card{rank = 2, suit = Heart}], top5 = []}, 
-		 Player{name = 4, status = Play, chips = 10, bet = 20, round_bet = 5, cards = [Card{rank = 5, suit = Diamond}, Card{rank = 5, suit = Heart}], top5 = []}, 
-		 Player{name = 5, status = Fold, chips = 10, bet = 20, round_bet = 5, cards = [Card{rank = 5, suit = Club}, Card{rank = 5, suit = Club}], top5 = []}]
+player_list = [  Player{name = 1, status = Play, chips = 100, bet = 10, round_bet = 10, cards = [Card{rank = 13, suit = Club}, Card{rank = 3, suit = Club}], top5 = []},
+		 Player{name = 2, status = Fold, chips = 100, bet = 10, round_bet = 5, cards = [Card{rank = 3, suit = Heart}, Card{rank = 4, suit = Diamond}], top5 = []},
+		 Player{name = 3, status = Play, chips = 100, bet = 10, round_bet = 5, cards = [Card{rank = 12, suit = Heart}, Card{rank = 2, suit = Heart}], top5 = []}, 
+		 Player{name = 4, status = Play, chips = 100, bet = 10, round_bet = 5, cards = [Card{rank = 5, suit = Diamond}, Card{rank = 5, suit = Heart}], top5 = []}, 
+		 Player{name = 5, status = Fold, chips = 100, bet = 10, round_bet = 5, cards = [Card{rank = 5, suit = Club}, Card{rank = 5, suit = Club}], top5 = []}]
 		 
 --community_cards = [Card{rank = 8, suit = Heart}, Card{rank = 13, suit = Diamond}, Card{rank = 12, suit = Club}, Card{rank = 12, suit = Spade}]-}
 
@@ -57,6 +57,6 @@ numtocard x =
 	 else Card{rank = x - 39, suit = Club}
 			 
 combtocards xs = map(\x -> [(numtocard (x!!0)), (numtocard (x!!1))]) xs
-main = print(outs play_list 0 community_cards (map numtocard [1..52]))
+--main = print(outs play_list 0 community_cards (map numtocard [1..52]))
 
 

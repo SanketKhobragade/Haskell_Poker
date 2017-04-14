@@ -9,8 +9,8 @@ c :: Int
 c = unsafePerformIO (getStdRandom (randomR (0,51)))
 
 shuffle :: Int -> [Int] -> [Int]
-shuffle ran xs = if (( elem ran xs) && (length xs < 15)) then shuffle (unsafePerformIO (getStdRandom (randomR (1,52)))) xs
-			else if (length xs < 15) then shuffle (unsafePerformIO (getStdRandom (randomR (1,52)))) (ran:xs)
+shuffle ran xs = if (( elem ran xs) && (length xs < 15)) then shuffle (unsafePerformIO (getStdRandom (randomR (0,51)))) xs
+			else if (length xs < 15) then shuffle (unsafePerformIO (getStdRandom (randomR (0,51)))) (ran:xs)
 			else xs
 
 int2card :: Int -> Card
@@ -28,13 +28,22 @@ init_player id = Player{
 		 	chips = start_money,
 		 	bet = 0,
 		 	round_bet = 0, 
-		 	cards = [int2card (list_shuffle !! ((id-1)*2)),int2card (list_shuffle !! (((id-1)*2)+1)) ],
+		 	cards = [],
 		 	top5 = []
 		 }
+
+playerList :: Int -> [Player]
+playerList id = if (id<5) then (init_player id): (playerList (id+1))
+		else []
 	
 players = player_list 5 []	
 
-c_cards= drop 10 list_shuffle
+c_cards = drop 10 list_shuffle
+
+dist_card :: [Player] -> [Int] -> [Player]
+dist_card [] _ = []
+dist_card (x:xs) (y1:y2:ys) = (x {cards = [int2card y1,int2card y2]}):(dist_card xs ys)
+				
 					
 comm_cards ::[Int] -> [Card]
 comm_cards (x:xs) = if xs==[] then [int2card x]

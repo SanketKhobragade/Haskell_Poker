@@ -6,18 +6,17 @@ import Data.List (sortBy)
 import Data.Function (on)
 import Player
 import Best5
+import Shuffle
 
-{-player_list = [  Player{name = 1, status = Play, chips = 10, bet = 20, round_bet = 5, cards = [Card{rank = 3, suit = Club}, Card{rank = 5, suit = Club}], top5 = []},
-		 Player{name = 2, status = Fold, chips = 30, bet = 10, round_bet = 0, cards = [Card{rank = 5, suit = Heart}, Card{rank = 5, suit = Diamond}], top5 = []},
-		 Player{name = 3, status = Play, chips = 10, bet = 15, round_bet = 5, cards = [Card{rank = 12, suit = Heart}, Card{rank = 2, suit = Heart}], top5 = []}, 
-		 Player{name = 4, status = Play, chips = 10, bet = 20, round_bet = 5, cards = [Card{rank = 5, suit = Diamond}, Card{rank = 5, suit = Heart}], top5 = []}, 
-		 Player{name = 5, status = Fold, chips = 10, bet = 20, round_bet = 5, cards = [Card{rank = 5, suit = Club}, Card{rank = 5, suit = Club}], top5 = []}]
-		 
-community_cards = [Card{rank = 8, suit = Heart}, Card{rank = 3, suit = Diamond}, Card{rank = 8, suit = Heart}, Card{rank = 4, suit = Heart}, Card{rank = 5, suit = Spade}]-}
+players_list = [  Player{name = 1, status = Fold, chips = 100, bet = 0, round_bet = 20, cards = [Card{rank = 13, suit = Club}, Card{rank = 3, suit = Club}], top5 = []},
+		 Player{name = 2, status = Fold, chips = 100, bet = 0, round_bet = 0, cards = [Card{rank = 3, suit = Heart}, Card{rank = 4, suit = Diamond}], top5 = []},
+		 Player{name = 3, status = Fold, chips = 100, bet = 0, round_bet = 20, cards = [Card{rank = 12, suit = Heart}, Card{rank = 2, suit = Heart}], top5 = []}, 
+		 Player{name = 4, status = Fold, chips = 100, bet = 20, round_bet = 0, cards = [Card{rank = 5, suit = Diamond}, Card{rank = 5, suit = Heart}], top5 = []}, 
+		 Player{name = 5, status = Play, chips = 100, bet = 20, round_bet = 0, cards = [Card{rank = 5, suit = Club}, Card{rank = 5, suit = Club}], top5 = []}]
 
-
-hands = map (\x -> x{top5 = preference (cards x ++ community_cards)})
-play_list = hands player_list
+hands :: [Player] -> [Card] -> [Player]
+hands xs deck = map (\x -> x{top5 = preference (cards x ++ deck)}) xs
+play_list = hands players_list
 
 ------------------Finding which player(NOT folded) has best cards----------------------	
 
