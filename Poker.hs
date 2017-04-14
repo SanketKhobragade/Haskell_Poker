@@ -53,7 +53,7 @@ display round turn p_list = do
 	onDestroy window mainQuit
 	mainGUI
 	--num <- get_bet
-	return 5
+	return 0
 	
 	
 
@@ -146,7 +146,7 @@ get_action1 = do
 
 get_action2 :: Int -> IO Int
 get_action2 x = do
-	putStrLn "1. Raise\n2. Call\n3. Fold "
+	putStrLn ("1. Raise\n2. Call("++ show x ++")\n3. Fold s")
 	txt <- getLine
 	let num = read txt :: Int
 	r<- (get_bet1 num x) 
@@ -177,7 +177,7 @@ get_bet1 x c = do
 get_bet2 :: Int -> IO Int
 get_bet2 x = do 
 	if x ==2 then return (-1)
-	else return 1
+	else return (-2)
 	
 {-get_bet2 :: Int -> IO Int
 get_bet2 x = do
@@ -186,9 +186,9 @@ get_bet2 x = do
 	else (get_bet 0)-}
 		
 link_action :: Int ->IO Int
-link_action x = do
+link_action x call= do
 	if x == 1 then get_action3
 	else if x == 2 then get_action1 
-	else (get_action2 45)
+	else (get_action2 call)
 	
 	
