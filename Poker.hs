@@ -11,8 +11,8 @@ back = "deck/back.jpg"
 
 --pl_card = [Card{rank = 3,suit = Spade},Card {rank = 13,suit = Diamond} ]
 
-display :: Int -> Int -> [Player] -> IO Int
-display round turn p_list = do
+display :: Int -> Int -> [Player] -> [Card] -> IO Int
+display round turn p_list crd = do
   	initGUI
 	window     <- windowNew
 	vbox       <- vBoxNew False 0
@@ -26,7 +26,7 @@ display round turn p_list = do
 	miscSetAlignment label1 0 0
 	boxPackStart vbox label1 PackNatural 0
 	
-	box1      <- makeCommunityCards community_cards round False 0 PackNatural 0
+	box1      <- makeCommunityCards crd round False 0 PackNatural 0
 	boxPackStart vbox box1 PackNatural 0
 	
 	sep        <- hSeparatorNew
