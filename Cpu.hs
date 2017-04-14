@@ -2,18 +2,19 @@ import Player
 import Winner
 import Best5
 import Data.List
+import Data.Function (on)
 
-player_list = [  Player{name = 1, status = Play, chips = 100, bet = 10, round_bet = 10, cards = [Card{rank = 13, suit = Club}, Card{rank = 3, suit = Club}], top5 = []},
-		 Player{name = 2, status = Fold, chips = 100, bet = 10, round_bet = 5, cards = [Card{rank = 3, suit = Heart}, Card{rank = 4, suit = Diamond}], top5 = []},
-		 Player{name = 3, status = Play, chips = 100, bet = 10, round_bet = 5, cards = [Card{rank = 12, suit = Heart}, Card{rank = 2, suit = Heart}], top5 = []}, 
-		 Player{name = 4, status = Play, chips = 100, bet = 10, round_bet = 5, cards = [Card{rank = 5, suit = Diamond}, Card{rank = 5, suit = Heart}], top5 = []}, 
-		 Player{name = 5, status = Fold, chips = 100, bet = 10, round_bet = 5, cards = [Card{rank = 5, suit = Club}, Card{rank = 5, suit = Club}], top5 = []}]
+player_list = [  Player{name = 1, status = Play, chips = 10, bet = 120, round_bet = 5, cards = [Card{rank = 10, suit = Club}, Card{rank = 2, suit = Club}], top5 = []},
+		 Player{name = 2, status = Fold, chips = 8, bet = 120, round_bet = 0, cards = [Card{rank = 3, suit = Heart}, Card{rank = 8, suit = Diamond}], top5 = []},
+		 Player{name = 3, status = Play, chips = 10, bet = 120, round_bet = 5, cards = [Card{rank = 12, suit = Heart}, Card{rank = 2, suit = Heart}], top5 = []}, 
+		 Player{name = 4, status = Play, chips = 10, bet = 120, round_bet = 5, cards = [Card{rank = 5, suit = Diamond}, Card{rank = 5, suit = Heart}], top5 = []}, 
+		 Player{name = 5, status = Fold, chips = 10, bet = 100, round_bet = 5, cards = [Card{rank = 5, suit = Club}, Card{rank = 5, suit = Club}], top5 = []}]
 		 
---community_cards = [Card{rank = 8, suit = Heart}, Card{rank = 13, suit = Diamond}, Card{rank = 12, suit = Club}, Card{rank = 12, suit = Spade}]-}
+community_cards = [Card{rank = 5, suit = Club}, Card{rank = 10, suit = Diamond}, Card{rank = 7, suit = Spade}, Card{rank = 13, suit = Diamond}, Card{rank = 9, suit = Heart}]
 
 
---hands = map (\x -> x{top5 = preference (cards x ++ community_cards)})
---play_list = hands player_list
+hands = map (\x -> x{top5 = preference (cards x ++ community_cards)})
+play_list = hands player_list
 
 all_possible :: Player -> [Card] -> [[Card]] -> Int
 all_possible _ _ [] = 0
@@ -46,7 +47,7 @@ user_ways p index deck =
 outs :: [Player] -> Int -> [Card] -> [Card] -> Int
 outs _ _ _ [] = 0
 outs p index deck (x:xs) = 
-	if user_ways p index (deck++[x]) < 100 && elem x (deck ++ cards (p!!index)) == False then outs p index deck xs + 1
+	if user_ways p index (deck++[x]) < 80 && elem x (deck ++ cards (p!!index)) == False then outs p index deck xs + 1
 	else outs p index deck xs
 
 numtocard :: Int -> Card
@@ -57,6 +58,80 @@ numtocard x =
 	 else Card{rank = x - 39, suit = Club}
 			 
 combtocards xs = map(\x -> [(numtocard (x!!0)), (numtocard (x!!1))]) xs
---main = print(outs play_list 0 community_cards (map numtocard [1..52]))
+
+bet_range :: [Player] -> Int -> Int -> [Card] -> Int
+bet_range p index round deck = 
+	if round == 0 then bet_range0 p index
+	else if round == 1 || round == 2 then bet_range1 p index round deck nouts
+	else (bet_range2 p index deck)
+	where
+	nouts = outs p index deck (map numtocard [1..52]) 
+	
+bet_range0 :: [Player] -> Int -> Int
+bet_range1 :: [Player] -> Int -> Int -> [Card] -> Int -> Int
+bet_range2 :: [Player] -> Int -> [Card] -> Int
+
+bet_range0 p i = 
+	if suit (card1) == suit (card2) || ((rank (card1) > 10 && rank (card2) > 10)) || (abs (rank (card1) - rank(card2)) > 0 && abs (rank (card1) - rank(card2)) < 3) then 100
+	else if rank card1 > 10 || rank card2 > 10 || rank card1 == rank card2 || abs (rank (card1) - rank(card2)) < 5 then 50
+	else 20
+	where
+	card1 = (cards (p!!i))!!0
+	card2 = (cards (p!!i))!!1
+
+bet_range1 p i round deck nouts = 
+	if odds > 1 then max (potmoney `div` (odds-1)) (nouts*10)
+	else chips (p!!i)
+	where
+	odds = (100 - (nouts * 4 `div` round)) `div` (nouts * 4 `div` round)
+	potmoney = foldl (\acc x -> acc + bet x) 0 p
+	
+bet_range2 p i deck = 
+	if ways < 30 then chips (p!!i)
+	else if ways < 80 then 500
+	else if ways < 150 then 100
+	else if ways < 200 then 50
+	else 0
+	where
+	ways = user_ways p i deck
+	
+bet_amt :: [Player] -> Int -> Int -> [Card] -> Int
+call_amt :: [Player] -> Int -> Int -> [Card] -> Int
+
+bet_amt p index round deck = 	
+	if round < 3 then min (range) (50*round)
+	else min (max (range) (bluff p index deck)) (200)
+	where 
+	range = bet_range p index round deck
+	
+call_amt p index round deck = 
+	if range > 2 * call_val then  
+	where
+	call_val = round_bet (maximumBy (compare `on` round_bet) p) - round_bet (p!!index)
+	max_val = chips (p!!index)
+	range = bet_range p index round deck
+	
+bluff :: [Player] -> Int -> [Card] -> Int
+bluff p i deck = 
+	if potmoney < 300 then 0
+	else if elem (rank last_card) (map (\x -> rank x) (take (length deck - 1) deck)) && all_possible (p!!i){cards = [last_card]} deck (combtocards (combinations 2 list)) < 80 then 200
+	else if length flushlist == 3 && elem last_card flushlist && nopair == 2 then 200
+	else 0
+	where 
+	last_card = (reverse deck) !! 0
+	flushlist = maximumBy (compare `on` length) (group_by_suit deck)
+	nopair = length (maximumBy (compare `on` length) (group_by_rank deck))
+	list = [1..52]\\cardtonum((cards (p!!i) ++ deck))
+	potmoney = foldl (\acc x -> acc + bet x) 0 p
+	
+{- When to bluff (only when there is high money in pot)
+1. When a card opens such that there is 3 cards of same colour
+2. When at the end a number opens such that it was 2nd of same rank and is < 10 (Make sure flush or straight is not possible)
+-}
+
+main = print(bet_amt play_list 1 3 community_cards)
+--main = print(bluff play_list 1 community_cards)
+--main = print(maximumBy (compare `on` length) (group_by_rank community_cards))
+
 
 
