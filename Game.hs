@@ -25,9 +25,9 @@ game xs turn round = do
 	let min_raise = 2*((round_bet (xs!!turn)) - (bet (xs!!turn)))
 	let call = (round_bet (xs!!turn))
 	
-	
-	act <- link_action (action_decide xs turn) call min_raise
+	act <- link_action (action_decide xs turn) call
 	return act
+
 
 main = do 
 	pid <- game players 1 0 
