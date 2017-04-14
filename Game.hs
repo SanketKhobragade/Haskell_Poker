@@ -8,6 +8,7 @@ import Shuffle
 import Player
 import Winner
 import Best5
+import Cpu
 
 get_userid ::Int ->  IO Int
 get_userid turn = do 
@@ -25,7 +26,7 @@ game xs trn round cd = do
 	--print(trn)
 	if status (xs!!trn) == Fold then return (-1)
 	else if status (xs!!trn) == Allin then return (-2)
-	else do
+	else if player_type (xs!!trn) == Human then do
 		--print(1)
 		id <- (get_userid trn)
 		display round trn xs cd
@@ -37,6 +38,8 @@ game xs trn round cd = do
 		act <- link_action (action_decide xs trn) call min_raise (round_bet (xs!!trn))
 		--print(10)
 		return act
+	else do
+		return (cpu_decide xs trn round cd)
 	
 
 turn :: [Player] -> Int -> Int -> Int -> [Card] -> IO [Player]
@@ -66,7 +69,7 @@ start_game p = do
 	let shuffleList = shuffle c []
 	--x <- getLine
 	--let l1 = (maximumBy (compare `on` length) ((group . sort ) (shuffleList)))
-	let p_dist = dist_card (playerList 0) shuffleList
+	let p_dist = dist_card (p) shuffleList
 	let l1 = (map (\x -> cards x) p_dist)
 	let community = comm_cards (drop 10 shuffleList)
 	let l2 = l1 ++ [community]
@@ -95,5 +98,5 @@ print_list p i = if i<=4 then do
 	
 
 main = do
-	start_game (playerList 0)
+	start_game (playerList 0 3)
 	

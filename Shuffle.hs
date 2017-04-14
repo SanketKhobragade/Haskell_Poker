@@ -9,9 +9,10 @@ c :: Int
 c = unsafePerformIO (getStdRandom (randomR (0,51)))
 
 shuffle :: Int -> [Int] -> [Int]
-shuffle ran xs = if (( elem ran xs) && (length xs < 15)) then shuffle (unsafePerformIO (getStdRandom (randomR (0,51)))) xs
-			else if (length xs < 15) then shuffle (unsafePerformIO (getStdRandom (randomR (0,51)))) (ran:xs)
+shuffle ran xs = if (( elem ran xs) && (length xs < 15)) then shuffle random xs
+			else if (length xs < 15) then shuffle random ([ran] ++ xs)
 			else xs
+			where random = unsafePerformIO (getStdRandom (randomR (0,51)))
 
 int2card :: Int -> Card
 int2card n = if n<=12 then Card{rank = n+1, suit = Spade}
@@ -21,19 +22,31 @@ int2card n = if n<=12 then Card{rank = n+1, suit = Spade}
 		
 list_shuffle = shuffle c []
 
-init_player :: Int -> Player
-init_player id = Player{
-			name = id ,
-		 	status = Play,
-		 	chips = start_money,
-		 	bet = 0,
-		 	round_bet = 0, 
-		 	cards = [],
-		 	top5 = []
-		 }
+init_player :: Int -> Int -> Player
+init_player id val = if val< 0 then 
+			Player{
+				name = id ,
+			 	status = Play,
+			 	chips = start_money,
+			 	bet = 0,
+			 	round_bet = 0, 
+			 	cards = [],
+			 	top5 = [],
+			 	player_type = Human
+			}
+		     else Player{
+				name = id ,
+			 	status = Play,
+			 	chips = start_money,
+			 	bet = 0,
+			 	round_bet = 0, 
+			 	cards = [],
+			 	top5 = [],
+			 	player_type = Cpu
+			}
 
-playerList :: Int -> [Player]
-playerList id = if (id<5) then (init_player id): (playerList (id+1))
+playerList :: Int -> Int -> [Player]
+playerList id val = if (id<5) then (init_player id (val-5)): (playerList (id+1) (val+1))
 		else []
 	
 players = player_list 5 []	
@@ -60,6 +73,6 @@ show_cards round = if round==0 then [] else
 start_money = 500
 
 player_list :: Int -> [Player] -> [Player]
-player_list id xs = if (length xs) < 5 then player_list (id-1) ((init_player id):xs)
+player_list id xs = if (length xs) < 5 then player_list (id-1) ((init_player id 0):xs)
 			else xs	 
 

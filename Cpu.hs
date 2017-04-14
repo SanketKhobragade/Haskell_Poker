@@ -1,4 +1,5 @@
-module Cpu where 
+module Cpu where
+ 
 import Player
 import Winner
 import Best5
@@ -98,7 +99,7 @@ bet_range2 p i deck =
 	
 bet_amt :: [Player] -> Int -> Int -> [Card] -> Int
 call_amt :: [Player] -> Int -> Int -> [Card] -> Int
-cpu_decide :: [Player] -> Int -> Int -> [Card] -> [Player]
+cpu_decide :: [Player] -> Int -> Int -> [Card] -> Int
 bet_amt p index round deck = 	
 	if round < 3 then min range (40*round + 20)
 	else min range 200
@@ -115,8 +116,8 @@ call_amt p index round deck =
 	range = bet_range p index round deck
 	
 cpu_decide p index round deck = 
-	if diff == 0 then action p index bet
-	else action p index call
+	if diff == 0 then bet
+	else call
 	where
 	diff = round_bet (maximumBy (compare `on` round_bet) p) - round_bet (p!!index)
 	bet = bet_amt p index round deck
@@ -145,6 +146,3 @@ bluff p i deck =
 --main = print(bet_amt play_list 1 3 community_cards)
 --main = print(bluff play_list 1 community_cards)
 --main = print(maximumBy (compare `on` length) (group_by_rank community_cards))
-
-
-
