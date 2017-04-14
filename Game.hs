@@ -1,4 +1,4 @@
-import Poker 
+--import Poker 
 import Data.List (tails)
 import Data.List
 import Data.List (sortBy)
@@ -93,10 +93,15 @@ print_list p i = if i<=4 then do
 			print_list p (i+1)
 		else putStrLn ""
 		where pl = (p!!i)
+			
+	
+print_winner :: [Player] -> Int -> IO()
+print_winner x i = do
+	if i < length ( winning_player x) then 
+			print (top5 ( winning_player x)!!i)
+			print_winner x i+1
+	else putStrLn ""
 		
-	
-	
-
 main = do
 	start_game (playerList 0 3)
 	
