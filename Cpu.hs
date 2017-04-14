@@ -9,11 +9,11 @@ player_list = [  Player{name = 1, status = Play, chips = 10, bet = 20, round_bet
 		 Player{name = 4, status = Play, chips = 10, bet = 20, round_bet = 5, cards = [Card{rank = 5, suit = Diamond}, Card{rank = 5, suit = Heart}], top5 = []}, 
 		 Player{name = 5, status = Fold, chips = 10, bet = 20, round_bet = 5, cards = [Card{rank = 5, suit = Club}, Card{rank = 5, suit = Club}], top5 = []}]
 		 
-community_cards = [Card{rank = 8, suit = Heart}, Card{rank = 13, suit = Diamond}, Card{rank = 12, suit = Club}, Card{rank = 12, suit = Spade}]
+--community_cards = [Card{rank = 8, suit = Heart}, Card{rank = 13, suit = Diamond}, Card{rank = 12, suit = Club}, Card{rank = 12, suit = Spade}]-}
 
 
-hands = map (\x -> x{top5 = preference (cards x ++ community_cards)})
-play_list = hands player_list
+--hands = map (\x -> x{top5 = preference (cards x ++ community_cards)})
+--play_list = hands player_list
 
 all_possible :: Player -> [Card] -> [[Card]] -> Int
 all_possible _ _ [] = 0
