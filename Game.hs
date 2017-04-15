@@ -32,7 +32,7 @@ game xs trn round cd = do
 		act <- link_action (action_decide xs trn) call min_raise (round_bet (xs!!trn))
 		return act
 	else do
-		print(trn)
+--		print(trn)
 		return (cpu_decide xs trn round (show_cards cd round))
 	
 
@@ -52,11 +52,25 @@ round_game p round cd = do
 		update1 <- turn p 0 1 round cd
 		let update2 = clear_roundbet update1
 		round_game update2 (round+1) cd
+ 
+change :: [Player] -> [Player]
+change xs = (tail xs) ++ [(head xs)]
+
+blind :: [Player] -> [Player]
+blind xs = (take 3 xs) ++ [small_blind(xs!!3)] ++ [big_blind(xs!!4)]  
+
+small_blind :: Player -> Player
+big_blind :: Player -> Player
+
+small_blind xs = action_bet xs 20
+big_blind xs = action_bet xs 40
+
 
 start_game :: [Player]	-> IO [Player]
 start_game p = do 
+	let blind_list = blind p 
 	let shuffleList = shuffle c []
-	let p_dist = dist_card (p) shuffleList
+	let p_dist = dist_card (blind_list) shuffleList
 	let community = comm_cards (drop 10 shuffleList)
 	after_round <- round_game p_dist 0 community
 	let best5list = hands after_round community
@@ -68,7 +82,8 @@ start_game p = do
 		win_display(winnerlist)
 	else print()
 	let init = map (\x -> x{status = Play, round_bet = 0, bet = 0, cards = [], top5 = []}) win
-	start_game init
+	let update_plist = change init
+	start_game 5
 
 --numberplayers xs = 
 print_head :: IO ()
@@ -88,8 +103,18 @@ print_list p i = if i<=4 then do
 			print_list p (i+1)
 		else putStrLn ""
 		where pl = (p!!i)
+		
+get_ncpu :: IO Int
+get_ncpu = do
+		putStrLn "Enter number of cpu players(MAX 5) : "
+		n_cpu <- getLine
+		return (read n_cpu :: Int)
 
-main = do
-	start_game (playerList 0 5)
+start :: IO [Player]
+start = do 
+	cpu_players <- get_ncpu
+	start_game (playerList 0 cpu_players)
+
+main = start
 
 	
