@@ -7,18 +7,7 @@ import Best5
 import Data.List
 import Data.Function (on)
 
-player_list = [  Player{name = 1, status = Play, chips = 10, bet = 120, round_bet = 5, cards = [Card{rank = 10, suit = Club}, Card{rank = 2, suit = Club}], top5 = []},
-		 Player{name = 2, status = Fold, chips = 8, bet = 120, round_bet = 0, cards = [Card{rank = 3, suit = Heart}, Card{rank = 8, suit = Diamond}], top5 = []},
-		 Player{name = 3, status = Play, chips = 10, bet = 120, round_bet = 5, cards = [Card{rank = 12, suit = Heart}, Card{rank = 2, suit = Heart}], top5 = []}, 
-		 Player{name = 4, status = Play, chips = 10, bet = 120, round_bet = 5, cards = [Card{rank = 5, suit = Diamond}, Card{rank = 5, suit = Heart}], top5 = []}, 
-		 Player{name = 5, status = Fold, chips = 10, bet = 100, round_bet = 5, cards = [Card{rank = 5, suit = Club}, Card{rank = 5, suit = Club}], top5 = []}]
-		 
-community_cards = [Card{rank = 5, suit = Club}, Card{rank = 10, suit = Diamond}, Card{rank = 7, suit = Spade}, Card{rank = 13, suit = Diamond}, Card{rank = 9, suit = Heart}]
-
-
-hands2 = map (\x -> x{top5 = preference (cards x ++ community_cards)})
-play_list = hands2 player_list
-
+----All possible ways cpu has opponent has better cards----
 all_possible :: Player -> [Card] -> [[Card]] -> Int
 all_possible _ _ [] = 0
 all_possible cpu deck (x:xs) = 
@@ -28,6 +17,7 @@ all_possible cpu deck (x:xs) =
 	cpu_cards = preference(cards cpu ++ deck)
 	user_cards = preference(x ++ deck)
 
+--------combination of 2 cards from 52---------
 combinations :: Int -> [a] -> [[a]]
 combinations 0 _ = [[]]
 combinations n xs = [ y:ys | y : xs' <- tails xs, ys <- combinations (n-1) xs']
@@ -47,6 +37,7 @@ user_ways p index deck =
 	player = p !! index
 	list = [1..52]\\cardtonum((cards (p!!index) ++ deck))
 	
+---------No of cards which will be in favour of us-------------------
 outs :: [Player] -> Int -> [Card] -> [Card] -> Int
 outs _ _ _ [] = 0
 outs p index deck (x:xs) = 
@@ -62,6 +53,7 @@ numtocard x =
 			 
 combtocards xs = map(\x -> [(numtocard (x!!0)), (numtocard (x!!1))]) xs
 
+----------------Setting maximum range of bet-----------------
 bet_range :: [Player] -> Int -> Int -> [Card] -> Int
 bet_range p index round deck = 
 	if round == 0 then bet_range0 p index
@@ -70,19 +62,20 @@ bet_range p index round deck =
 	where
 	nouts = outs p index deck (map numtocard [1..52]) 
 	
-bet_range0 :: [Player] -> Int -> Int
-bet_range1 :: [Player] -> Int -> Int -> [Card] -> Int -> Int
-bet_range2 :: [Player] -> Int -> [Card] -> Int
+
+bet_range0 :: [Player] -> Int -> Int						-- round 0
+bet_range1 :: [Player] -> Int -> Int -> [Card] -> Int -> Int			-- round 1
+bet_range2 :: [Player] -> Int -> [Card] -> Int					-- round 2
 
 bet_range0 p i = 
 	if f == 1 then 0
-	else if suit (card1) == suit (card2) || ((rank (card1) > 10 && rank (card2) > 10)) || (abs (rank (card1) - rank(card2)) > 0 && abs (rank (card1) - rank(card2)) < 3) then 100
+	else if suit (card1) == suit (card2) || ((rank (card1) > 10 && rank (card2) > 10)) || (abs (rank (card1) - rank(card2)) > 0 && abs (rank (card1) - rank(card2)) < 3) then 100 -- 
 	else if rank card1 > 10 || rank card2 > 10 || rank card1 == rank card2 || abs (rank (card1) - rank(card2)) < 5 then 50
 	else 20
 	where
 	card1 = (cards (p!!i))!!0
 	card2 = (cards (p!!i))!!1
-	num = 200000000 - i
+	num = 200000000 - i	-- adding wait time
 	f = last [1..num]
 
 bet_range1 p i rnd deck nouts = 
@@ -112,6 +105,8 @@ bet_range2 p i deck =
 bet_amt :: [Player] -> Int -> Int -> [Card] -> Int
 call_amt :: [Player] -> Int -> Int -> [Card] -> Int
 cpu_decide :: [Player] -> Int -> Int -> [Card] -> Int
+
+-- Finding how much player player has to bet in his turn-----
 bet_amt p index round deck = 	
 	if round == 3 && range > 200 then 200
 	else if round == 3 then 0
@@ -121,6 +116,7 @@ bet_amt p index round deck =
 	where 
 	range = bet_range p index round deck
 	
+-- Finding how much cpu shoul call or raise --------
 call_amt p index round deck = 
 	if round == 3 && range > 200 then call_val + 200
 	else if range > (2*call_val) && round < 3 && range > 2*call_val + round_bet (p!!index) then max (2*call_val + round_bet (p!!index)) (40*round + 20)
@@ -140,7 +136,7 @@ cpu_decide p index round deck =
 	bet = bet_amt p index round deck
 	call = call_amt p index round deck
 
-	
+-- Bluff--
 bluff_or_not ::Int -> Bool
 bluff_or_not r = if r<25 then True
 			else False
