@@ -65,7 +65,7 @@ combtocards xs = map(\x -> [(numtocard (x!!0)), (numtocard (x!!1))]) xs
 bet_range :: [Player] -> Int -> Int -> [Card] -> Int
 bet_range p index round deck = 
 	if round == 0 then bet_range0 p index
-	else if round == 1 || round == 2 then bet_range1 p index round deck nouts
+	else if round == 1 || round == 2 then max (bet_range1 p index round deck nouts) (10 * nouts)
 	else (bet_range2 p index deck)
 	where
 	nouts = outs p index deck (map numtocard [1..52]) 
@@ -75,15 +75,18 @@ bet_range1 :: [Player] -> Int -> Int -> [Card] -> Int -> Int
 bet_range2 :: [Player] -> Int -> [Card] -> Int
 
 bet_range0 p i = 
-	if suit (card1) == suit (card2) || ((rank (card1) > 10 && rank (card2) > 10)) || (abs (rank (card1) - rank(card2)) > 0 && abs (rank (card1) - rank(card2)) < 3) then 100
+	if f == 1 then 0
+	else if suit (card1) == suit (card2) || ((rank (card1) > 10 && rank (card2) > 10)) || (abs (rank (card1) - rank(card2)) > 0 && abs (rank (card1) - rank(card2)) < 3) then 100
 	else if rank card1 > 10 || rank card2 > 10 || rank card1 == rank card2 || abs (rank (card1) - rank(card2)) < 5 then 50
 	else 20
 	where
 	card1 = (cards (p!!i))!!0
 	card2 = (cards (p!!i))!!1
+	num = 200000000 - i
+	f = last [1..num]
 
 bet_range1 p i rnd deck nouts = 
-	if odds > 1 then (round mon)
+	if odds > 1 then (ceiling mon)
 	else chips (p!!i)
 	where
 	odds = (100 - (4 * ratio)) / (4 * ratio)
@@ -95,13 +98,16 @@ bet_range1 p i rnd deck nouts =
 	mon = fpotmoney / (odds - 1)
 	
 bet_range2 p i deck = 
-	if ways < 30 then chips (p!!i)
+	if f == 1 then 0
+	else if ways < 30 then chips (p!!i)
 	else if ways < 80 then 500
 	else if ways < 150 then 100
 	else if ways < 200 then 50
 	else 0
 	where
 	ways = user_ways p i deck
+	num = 200000000 - i
+	f = last [1..num]
 	
 bet_amt :: [Player] -> Int -> Int -> [Card] -> Int
 call_amt :: [Player] -> Int -> Int -> [Card] -> Int
@@ -144,25 +150,3 @@ bluff1 round =
 	if (bluff_or_not (unsafePerformIO (getStdRandom (randomR (0,99))))) then 0
 	else 5000000
 
-	
-{-bluff :: [Player] -> Int -> [Card] -> Int
-bluff p i deck = 
-	if potmoney < 300 then 0
-	else if elem (rank last_card) (map (\x -> rank x) (take (length deck - 1) deck)) && all_possible (p!!i){cards = [last_card]} deck (combtocards (combinations 2 list)) < 80 then 200
-	else if length flushlist == 3 && elem last_card flushlist && nopair == 2 then 200
-	else 0
-	where 
-	last_card = (reverse deck) !! 0
-	flushlist = maximumBy (compare `on` length) (group_by_suit deck)
-	nopair = length (maximumBy (compare `on` length) (group_by_rank deck))
-	list = [1..52]\\cardtonum((cards (p!!i) ++ deck))
-	potmoney = foldl (\acc x -> acc + bet x) 0 p-}
-	
-{- When to bluff (only when there is high money in pot)
-1. When a card opens such that there is 3 cards of same colour
-2. When at the end a number opens such that it was 2nd of same rank and is < 10 (Make sure flush or straight is not possible)
--}
-
---main = print(bet_amt play_list 1 3 community_cards)
---main = print(bluff play_list 1 community_cards)
---main = print(maximumBy (compare `on` length) (group_by_rank community_cards))

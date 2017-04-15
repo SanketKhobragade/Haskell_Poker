@@ -26,9 +26,6 @@ func p bet round =
 	else if bet == (-2) then action_allin p
 	else action_bet p bet
 
---act1 :: Player -> Player
---act1 p = 
-
 round_money :: [Player] -> Int
 round_money xs =  (round_bet (head (sortBy (flip compare `on` round_bet) xs)))
 
