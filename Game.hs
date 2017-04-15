@@ -73,15 +73,9 @@ start_game p = do
 	let community = comm_cards (drop 10 shuffleList)
 	after_round <- round_game p_dist 0 community
 	let best5list = hands after_round community
-	let winnerlist = winning_player best5list
-	let win = pot best5list
-	let rem = foldl (\acc x -> if (status x == Fold) then (acc + 0) else (acc + 1)) 0 best5list
-	if rem /= 1 then do
-		putStrLn "Community cards"
-		print(community)
-		putStrLn "Winners"
-		win_display(winnerlist)
-	else print()
+	putStrLn "Community cards"
+	print(community)
+	win <- modify_winners best5list
 	let init = map (\x -> x{status = Play, round_bet = 0, bet = 0, cards = [], top5 = []}) win
 	let chips_rem = map(\x -> chips x) init
 	print(chips_rem)
@@ -93,6 +87,21 @@ print_head :: IO ()
 print_head = do
 	putStrLn ("Name\tStatus\tChips\tBet\tRound Bet")
 
+modify_winners :: [Player] -> IO [Player]
+modify_winners p = do
+	let winnerlist = winning_player p
+	let win = pot p
+	--print(win)
+	let rem = foldl (\acc x -> if (status x == Fold) then (acc + 0) else (acc + 1)) 0 p
+	if rem /= 1 then do
+		putStrLn "Winners"
+		win_display(winnerlist)
+	else print()
+	let max_bet = maximum (map (\x -> bet x) win)
+	if max_bet == 0 then return (win)
+	else modify_winners win
+	
+	
 win_display :: [Player] -> IO ()
 win_display [] = print()
 win_display (x:xs) = do
@@ -108,6 +117,7 @@ print_list p i = if i<=4 then do
 		where pl = (p!!i)
 
 main = do
-	start_game (playerList 0 4)
+	--modify_winners (playerList 0 4)
+	start_game (playerList 0 5)
 
 	
