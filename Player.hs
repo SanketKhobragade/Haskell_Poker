@@ -2,6 +2,9 @@ module Player where
 import Best5 
 import Data.List
 import Data.Function (on)
+
+data User = Cpu | Human 
+	deriving (Eq,Show)
 data State = Play | Allin | Fold
 	deriving (Eq, Show)
 data Player = Player
@@ -13,13 +16,14 @@ data Player = Player
 	, round_bet :: Int
 	, cards :: [Card] 
 	, top5 :: [Card]
+	, player_type :: User
 	} deriving (Eq, Show)
 
 func :: Player -> Int -> Int -> Player
 func p bet round = 
 	if bet == 0 then action_call p (round - round_bet p)
-	else if bet == -1 then action_fold p 
-	else if bet == -2 then action_allin p
+	else if bet == (-1) then action_fold p 
+	else if bet == (-2) then action_allin p
 	else action_bet p bet
 
 --act1 :: Player -> Player

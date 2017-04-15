@@ -8,11 +8,11 @@ import Player
 import Best5
 import Shuffle
 
-players_list = [  Player{name = 1, status = Fold, chips = 100, bet = 0, round_bet = 20, cards = [Card{rank = 13, suit = Club}, Card{rank = 3, suit = Club}], top5 = []},
+players_list = [  Player{name = 1, status = Allin, chips = 0, bet = 500, round_bet = 20, cards = [Card{rank = 13, suit = Club}, Card{rank = 3, suit = Club}], top5 = []},
 		 Player{name = 2, status = Fold, chips = 100, bet = 0, round_bet = 0, cards = [Card{rank = 3, suit = Heart}, Card{rank = 4, suit = Diamond}], top5 = []},
 		 Player{name = 3, status = Fold, chips = 100, bet = 0, round_bet = 20, cards = [Card{rank = 12, suit = Heart}, Card{rank = 2, suit = Heart}], top5 = []}, 
 		 Player{name = 4, status = Fold, chips = 100, bet = 20, round_bet = 0, cards = [Card{rank = 5, suit = Diamond}, Card{rank = 5, suit = Heart}], top5 = []}, 
-		 Player{name = 5, status = Play, chips = 100, bet = 20, round_bet = 0, cards = [Card{rank = 5, suit = Club}, Card{rank = 5, suit = Club}], top5 = []}]
+		 Player{name = 5, status = Play, chips = 200, bet = 20, round_bet = 0, cards = [Card{rank = 5, suit = Club}, Card{rank = 5, suit = Club}], top5 = []}]
 
 hands :: [Player] -> [Card] -> [Player]
 hands xs deck = map (\x -> x{top5 = preference (cards x ++ deck)}) xs

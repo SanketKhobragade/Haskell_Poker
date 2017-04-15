@@ -13,7 +13,7 @@ data Card = Card {
 	suit :: Suit
 	} deriving (Ord,Eq, Show)
 
-list = [Card{rank = 2, suit = Heart}, Card{rank = 2, suit = Heart}, Card{rank = 10, suit = Diamond}, Card{rank = 5, suit = Club}, Card{rank = 5, suit = Spade}, Card{rank = 12, suit = Club}, Card{rank = 10, suit = Club}]
+list = [Card{rank = 11, suit = Heart}, Card{rank = 10, suit = Heart}, Card{rank = 9, suit = Diamond}, Card{rank = 8, suit = Club}, Card{rank = 7, suit = Spade}, Card{rank = 6, suit = Club}, Card{rank = 10, suit = Club}]
 
 group_by_rank :: [Card] -> [[Card]]
 group_by_suit :: [Card] -> [[Card]]
@@ -25,10 +25,13 @@ group_by_rank xs = groupBy (\a b -> rank a == rank b) (sort_by_rank xs)
 group_by_suit xs = groupBy (\a b -> suit a == suit b) (sort_by_suit xs)
 
 ----------Adding ace by changing its value since both (A K Q J 10) and (5 4 3 2 A) are strights -----
-modify_straight :: [Card] -> [Card]
-modify_straight (x:xs)
-	| rank x == 1 = (x:xs) ++ [Card{rank = 14,suit = suit x}]
+modify_straight1 :: [Card] -> [Card]
+modify_straight2 :: [Card] -> [Card]
+modify_straight1 (x:xs)
+	| rank x == 13 = (x:xs) ++ [Card{rank = 0,suit = suit x}]
 	| otherwise = x:xs
+	
+modify_straight2 xs = map (\x -> head x) (group_by_rank xs) 
 	
 -----------------------------------------------------------------------------------------------------
 
@@ -46,8 +49,8 @@ flush x =
 check_straight :: [Card] -> [Card]
 check_straight [_] = []	
 check_straight (x:y:xs) 
-	| (rank x - rank y) == 1 && length xs ==0 = x : y : []
-	| (rank x - rank y) == 1 && length xs /=0 = x : check_straight (y:xs)
+	| (rank x - rank y) == 1 && length xs == 0 = x : y : []
+	| (rank x - rank y) == 1 && length xs /= 0 = x : check_straight (y:xs)
 	| otherwise = [x]
 	
 straight :: [Card] -> [Card]
@@ -82,7 +85,7 @@ sort_pairs l1 l2 remain =
 ---------------------------------------------------------------------------------------------------------		
 	
 list_flush xs = flush xs
-list_straight xs  =  (straight . sort_by_rank) xs
+list_straight xs  =  (straight . sort_by_rank) ((modify_straight2 . modify_straight1) xs)
 list_pair xs = sort_pairs  (group_by_rank xs) [] 5
 
 

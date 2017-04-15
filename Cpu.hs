@@ -1,4 +1,6 @@
-module Cpu where 
+module Cpu where
+import System.IO.Unsafe                                         
+import System.Random 
 import Player
 import Winner
 import Best5
@@ -80,12 +82,17 @@ bet_range0 p i =
 	card1 = (cards (p!!i))!!0
 	card2 = (cards (p!!i))!!1
 
-bet_range1 p i round deck nouts = 
-	if odds > 1 then max (potmoney `div` (odds-1)) (nouts*10)
+bet_range1 p i rnd deck nouts = 
+	if odds > 1 then (round mon)
 	else chips (p!!i)
 	where
-	odds = (100 - (nouts * 4 `div` round)) `div` (nouts * 4 `div` round)
+	odds = (100 - (4 * ratio)) / (4 * ratio)
 	potmoney = foldl (\acc x -> acc + bet x) 0 p
+	fnouts = fromIntegral nouts :: Float
+	fround = fromIntegral rnd :: Float
+	ratio = fnouts / fround
+	fpotmoney = fromIntegral potmoney :: Float
+	mon = fpotmoney / (odds - 1)
 	
 bet_range2 p i deck = 
 	if ways < 30 then chips (p!!i)
@@ -98,31 +105,45 @@ bet_range2 p i deck =
 	
 bet_amt :: [Player] -> Int -> Int -> [Card] -> Int
 call_amt :: [Player] -> Int -> Int -> [Card] -> Int
-cpu_decide :: [Player] -> Int -> Int -> [Card] -> [Player]
+cpu_decide :: [Player] -> Int -> Int -> [Card] -> Int
 bet_amt p index round deck = 	
-	if round < 3 then min range (40*round + 20)
+	if round == 3 && range > 200 then 200
+	else if round == 3 then 0
+	else if round < 3 && range < 50 then 0
+	else if round < 3 then (40*round + 20)
 	else min range 200
 	where 
 	range = bet_range p index round deck
 	
 call_amt p index round deck = 
-	if range > 2*call_val then (range - call_val)
+	if round == 3 && range > 200 then call_val + 200
+	else if range > (2*call_val) && round < 3 && range > 2*call_val + round_bet (p!!index) then max (2*call_val + round_bet (p!!index)) (40*round + 20)
 	else if range > call_val then call_val
-	else -1
+	else (-1)
 	where
 	call_val = round_bet (maximumBy (compare `on` round_bet) p) - round_bet (p!!index)
 	max_val = chips (p!!index)
 	range = bet_range p index round deck
 	
 cpu_decide p index round deck = 
-	if diff == 0 then action p index bet
-	else action p index call
+	if diff == 0 then min ((bet `div` 10) * 10) (bluff1 round) 
+	else if call == (-1) then (-1)
+	else (call `div` 10) * 10
 	where
 	diff = round_bet (maximumBy (compare `on` round_bet) p) - round_bet (p!!index)
 	bet = bet_amt p index round deck
 	call = call_amt p index round deck
 
 	
+bluff_or_not ::Int -> Bool
+bluff_or_not r = if r<25 then True
+			else False
+		
+bluff1 :: Int -> Int
+bluff1 round = 
+	if (bluff_or_not (unsafePerformIO (getStdRandom (randomR (0,99))))) then 0
+	else 5000000
+
 	
 {-bluff :: [Player] -> Int -> [Card] -> Int
 bluff p i deck = 
@@ -145,6 +166,3 @@ bluff p i deck =
 --main = print(bet_amt play_list 1 3 community_cards)
 --main = print(bluff play_list 1 community_cards)
 --main = print(maximumBy (compare `on` length) (group_by_rank community_cards))
-
-
-
