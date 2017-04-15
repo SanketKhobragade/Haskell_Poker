@@ -1,19 +1,18 @@
--- file: ch03/add.hs
 module Best5 where
+
 import Data.List (tails)
 import Data.List
 import Data.List (sortBy)
 import Data.Function (on)
 import System.Random
 
-data Suit = Spade | Club | Diamond | Heart
+data Suit = Spade | Club | Diamond | Heart 
 	deriving (Ord, Eq, Show)
 data Card = Card {
 	rank :: Int,
 	suit :: Suit
 	} deriving (Ord,Eq, Show)
 
-list = [Card{rank = 11, suit = Heart}, Card{rank = 10, suit = Heart}, Card{rank = 9, suit = Diamond}, Card{rank = 8, suit = Club}, Card{rank = 7, suit = Spade}, Card{rank = 6, suit = Club}, Card{rank = 10, suit = Club}]
 
 group_by_rank :: [Card] -> [[Card]]
 group_by_suit :: [Card] -> [[Card]]

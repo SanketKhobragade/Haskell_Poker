@@ -10,6 +10,8 @@ import Winner
 import Best5
 import Cpu
 
+-----------------Taking user ID and checking for corresponding player's turn--------------
+
 get_userid ::Int ->  IO Int
 get_userid turn = do 
 	putStrLn "Enter user ID :"
@@ -19,6 +21,9 @@ get_userid turn = do
 	else do
 		putStrLn "Incorrect UserID"
 		(get_userid turn)
+		
+
+---------------For start of agame (giving turns to CPU and Human players)-------------------
 		
 game :: [Player] -> Int -> Int -> [Card]-> IO Int
 game xs trn round cd = do
@@ -36,6 +41,8 @@ game xs trn round cd = do
 		return (cpu_decide xs trn round (show_cards cd round))
 	
 
+---------------- Passing turn to the next player in the list---------------------------
+
 turn :: [Player] -> Int -> Int -> Int -> [Card] -> IO [Player]
 turn p i n round cd = do
 	print_head
@@ -45,6 +52,8 @@ turn p i n round cd = do
 		bet <- game p i round  cd
 		(turn (action p i bet) ((i+1) `mod` 5) (n+1) round) cd
 
+-------------- For each round giving each player a turn and clearing round_bet after each round------------------
+
 round_game :: [Player] -> Int -> [Card] -> IO [Player]	
 round_game p round cd = do
 	if round > 3 then return p
@@ -52,15 +61,19 @@ round_game p round cd = do
 		update1 <- turn p 0 1 round cd
 		let update2 = clear_roundbet update1
 		round_game update2 (round+1) cd
+	
+------------Function to update list so that each player should begin game by turn -----------------
 		
 change :: [Player] -> [Player]
 change xs = (tail xs) ++ [(head xs)]
 
+
+------------Giving small blind to player 3 in list and big blind to player 4 in list-------------
 blind :: [Player] -> [Player]
 blind xs = (take 3 xs) ++ [small_blind(xs!!3)] ++ [big_blind(xs!!4)]  
 
-small_blind :: Player -> Player
-big_blind :: Player -> Player
+small_blind :: Player -> Player --------Small blind should bet 20
+big_blind :: Player -> Player	--------Big blind should bet 40
 
 small_blind xs = action_bet xs 20
 big_blind xs = action_bet xs 40
@@ -81,12 +94,28 @@ start_game p = do
 	print(chips_rem)
 	putStrLn "Press Enter to start new game"
 	prompt <- getLine
-	start_game (change init)
+	start_game (change init)				
 
+----------Printing activity log header -------------------
 print_head :: IO ()
 print_head = do
 	putStrLn ("Name\tStatus\tChips\tBet\tRound Bet")
+	
+print_list :: [Player] -> Int -> IO ()
+print_list p i = if i<=4 then do
+			putStrLn ((show (name pl)) ++ "\t" ++ (show (status pl)) ++"\t" ++ (show (chips pl)) ++ "\t" ++ (show (bet pl)) ++ "\t" ++ (show (round_bet pl)))
+			print_list p (i+1)
+		else putStrLn ""
+		where pl = (p!!i)
+------------------------------------------------------------------
 
+----------winner display-----------------------------
+win_display :: [Player] -> IO ()
+win_display [] = print()
+win_display (x:xs) = do
+	putStrLn ((show (name x)) ++ "\t" ++ (show (cards x)) ++"\t" ++ (show (drop 1 (top5 x))))
+	win_display xs
+	
 modify_winners :: [Player] -> IO [Player]
 modify_winners p = do
 	let winnerlist = winning_player p
@@ -101,23 +130,9 @@ modify_winners p = do
 	if max_bet == 0 then return (win)
 	else modify_winners win
 	
-	
-win_display :: [Player] -> IO ()
-win_display [] = print()
-win_display (x:xs) = do
-	putStrLn ((show (name x)) ++ "\t" ++ (show (cards x)) ++"\t" ++ (show (drop 1 (top5 x))))
-	win_display xs
-	
-	
-print_list :: [Player] -> Int -> IO ()
-print_list p i = if i<=4 then do
-			putStrLn ((show (name pl)) ++ "\t" ++ (show (status pl)) ++"\t" ++ (show (chips pl)) ++ "\t" ++ (show (bet pl)) ++ "\t" ++ (show (round_bet pl)))
-			print_list p (i+1)
-		else putStrLn ""
-		where pl = (p!!i)
+
 
 main = do
-	--modify_winners (playerList 0 4)
-	start_game (playerList 0 5)
+	start_game (playerList 0 4)
 
 	

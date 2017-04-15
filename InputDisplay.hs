@@ -1,6 +1,6 @@
 module InputDisplay where
 
-import Graphics.UI.Gtk
+import Graphics.UI.Gtk 			--Graphics library used for display
 import Data.List
 import Shuffle
 import Best5
@@ -12,7 +12,7 @@ back = "deck/back.jpg"
 display :: Int -> Int -> [Player] -> [Card] -> IO Int
 display round turn p_list crd = do
   	initGUI
-	window     <- windowNew
+	window     <- windowNew		--Creating new window
 	vbox       <- vBoxNew False 0
 	
 	set window [windowDefaultWidth := 600, windowDefaultHeight := 400,
@@ -20,11 +20,11 @@ display round turn p_list crd = do
 	      windowTitle := "Texas Holdem Poker",
 	      containerChild := vbox]
 	
-	label1     <- labelNew (Just "COMMUNITY CARDS : ")
+	label1     <- labelNew (Just "TABLE CARDS : ")
 	miscSetAlignment label1 0 0
 	boxPackStart vbox label1 PackNatural 0
 	
-	box1      <- makeCommunityCards crd round False 0 PackNatural 0
+	box1      <- makeCommunityCards crd round False 0 PackNatural 0		--Displaying community cards
 	boxPackStart vbox box1 PackNatural 0
 	
 	sep        <- hSeparatorNew
@@ -34,7 +34,7 @@ display round turn p_list crd = do
 	miscSetAlignment label2 0 0
 	boxPackStart vbox label2 PackNatural 0
 	
-	box2       <- makePlayerCards (cards (p_list!!turn)) False 0 PackNatural 0
+	box2       <- makePlayerCards (cards (p_list!!turn)) False 0 PackNatural 0 --Display player cards
 	boxPackStart vbox box2 PackNatural 0
 	
 	sep2        <- hSeparatorNew
@@ -54,6 +54,7 @@ display round turn p_list crd = do
 	return 0
 	
 	
+--------------Function to display each community card of each button----------------
 
 makeCommunityCards :: [Card] -> Int -> Bool -> Int -> Packing -> Int -> IO HBox
 makeCommunityCards xs round homogeneous spacing packing padding = do
@@ -85,6 +86,9 @@ makeCommunityCards xs round homogeneous spacing packing padding = do
 	containerAdd button5 b
 	
 	return box
+--------------------------------------------------------------
+
+-----------Display Player's card ----------------------
 	
 makePlayerCards :: [Card] -> Bool -> Int -> Packing -> Int -> IO HBox
 makePlayerCards xs homogeneous spacing packing padding = do
@@ -100,6 +104,10 @@ makePlayerCards xs homogeneous spacing packing padding = do
 	containerAdd button2 b
 	
 	return box
+----------------------------------------------
+
+
+--------------Conditions to show community cards---------------------
 	
 check1 :: Int -> Int -> [Card] -> IO HBox
 check1 round i xs = if round /= 0 then labelBox (card2file (xs!!i))
@@ -113,6 +121,10 @@ check3 :: Int -> Int -> [Card] -> IO HBox
 check3 round i xs = if (round /= 2 && round /=1 && round/=0) then labelBox (card2file (xs!!i))
 			else labelBox back
 	
+----------------------------------------------------------------------------
+
+-------------For uploading images -----------------------------
+	
 labelBox :: FilePath -> IO HBox
 labelBox fn = do
 	box <- hBoxNew False 0
@@ -123,7 +135,9 @@ labelBox fn = do
 	
 card2file :: Card -> [Char]
 card2file c = "deck/" ++ (show (rank c)) ++ (show (suit c)) ++ ".jpg"
+---------------------------------------------------------------------------
 
+--------------------Getting user input from user in console ------------------
 get_action1 :: IO Int
 get_action1 = do 
 	putStrLn "1. Bet\n2. Check\n3. Fold "
@@ -148,13 +162,13 @@ get_action3 = do
 	r<- (get_bet2 num)
 	return r
 	
-get_action4 :: Int -> IO Int
+{-get_action4 :: Int -> IO Int
 get_action4 x = do
 	putStrLn ("1. Allin\n2. Call("++ show x ++")\n3. Fold")
 	txt <- getLine
 	let num = read txt :: Int
 	r<- (get_bet3 num x) 
-	return r
+	return r-}
 
 get_bet :: Int -> Int -> IO Int
 get_bet x roundBet = do 
@@ -181,10 +195,10 @@ get_bet3 x c = do
 	else if x == 2 then return 0
 	else return (-2)
 		
-link_action :: Int -> Int -> Int -> Int ->IO Int
+link_action :: Int -> Int -> Int -> Int ->IO Int --linking action according to round_bet and chips and bet
 link_action x call y roundBet = do
 	if x == 1 then get_action3 
 	else if x == 2 then get_action1
 	else (get_action2 call roundBet )
-	
+------------------------------------------------------------------------------	
 	

@@ -6,22 +6,25 @@ import Player
 import Best5
           
 c :: Int
-c = unsafePerformIO (getStdRandom (randomR (0,51)))
+c = unsafePerformIO (getStdRandom (randomR (0,51)))  --Seed for shuffle function to start
 
+
+---------------------Generating random number and adding to list if not present--------------
 shuffle :: Int -> [Int] -> [Int]
 shuffle ran xs = if (( elem ran xs) && (length xs < 15)) then shuffle random xs
 			else if (length xs < 15) then shuffle random ([ran] ++ xs)
 			else xs
 			where random = unsafePerformIO (getStdRandom (randomR (0,51)))
 
+-------------------Converting each integer to Data type Card---------------
 int2card :: Int -> Card
 int2card n = if n<=12 then Card{rank = n+1, suit = Spade}
 		else if n<=25 then Card {rank = (mod n 13)+1 ,suit = Heart}
 		else if n<=38 then Card {rank = (mod n 13)+1, suit = Club}
 		else Card{rank = (mod n 13)+1 , suit = Diamond}
 		
-list_shuffle = shuffle c []
 
+-----------------Initialising each player(Human/CPU) ----------------
 init_player :: Int -> Int -> Player
 init_player id val = if val< 0 then 
 			Player{
@@ -45,13 +48,11 @@ init_player id val = if val< 0 then
 			 	player_type = Cpu
 			}
 
+
+----------------Creating playerList--------------------------
 playerList :: Int -> Int -> [Player]
 playerList id val = if (id<5) then (init_player id (val-5)): (playerList (id+1) (val+1))
-		else []
-	
-players = player_list 5 []	
-
-c_cards = drop 10 list_shuffle
+		else []	
 
 dist_card :: [Player] -> [Int] -> [Player]
 dist_card [] _ = []
@@ -62,7 +63,6 @@ comm_cards ::[Int] -> [Card]
 comm_cards (x:xs) = if xs==[] then [int2card x]
 			else [int2card x] ++ comm_cards xs
 			
-community_cards = comm_cards c_cards
 
 show_cards :: [Card] -> Int -> [Card]
 show_cards deck round = if round==0 then [] else
